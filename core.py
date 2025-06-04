@@ -56,5 +56,33 @@ class mystat_auth:
         else:
             print(f"[ERROR] Ошибка получения оценок: {response.status_code} — {response.text}")
             return None
-    def get_schedule(self):
-        W_url="https://mapi.itstep.org/v1/mystat/aqtobe/schedule/get-month?type=week&date_filter=2025-06-02"
+    def get_schedule_week(self, date):
+        if not self.is_token_valid():
+            print("[ERROR] Токен недействителен, требуется повторная авторизация.")
+            return None
+        url=f"https://mapi.itstep.org/v1/mystat/aqtobe/schedule/get-month?type=week&date_filter={date}"
+        headers = {
+            'Authorization': f'Bearer {config.Bearer}'
+        }
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            print(f"[ERROR] Ошибка получения расписания: {response.status_code} — {response.text}")
+            return None
+    def get_schedule_month(self, date):
+        if not self.is_token_valid():
+            print("[ERROR] Токен недействителен, требуется повторная авторизация.")
+            return None
+        url=f'https://mapi.itstep.org/v1/mystat/aqtobe/schedule/get-existing-schedule?date_filter={date}'
+        headers = {
+            'Authorization': f'Bearer {config.Bearer}'
+        }
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            print(f"[ERROR] Ошибка получения расписания: {response.status_code} — {response.text}")
+            return None

@@ -1,15 +1,15 @@
 import time
 import requests
-import config
+
 
 class mystat_auth:
-    TOKEN_LIFETIME = 7200  
+    TOKEN_LIFETIME = 7200
 
     def __init__(self, login, password):
         self.login = login
         self.password = password
-
-
+        self.Bearer = ''
+        self.timecode = 0
 
     def get_auth(self):
         url = 'https://mapi.itstep.org/v1/mystat/auth/login'
@@ -19,32 +19,23 @@ class mystat_auth:
         })
 
         if response.status_code == 200:
-            config.timecode = time.time()
-            config.Bearer = response.text.strip('"')  
+            self.timecode = time.time()
+            self.Bearer = response.text.strip('"')  
             print("[INFO] Новый токен успешно получен.")
-            return config.Bearer
+            return self.Bearer
         else:
             print(f"[ERROR] Ошибка авторизации: {response.status_code} — {response.text}")
             return None
 
-
-
     def is_token_valid(self):
-        if hasattr(config, 'timecode') and hasattr(config, 'Bearer') and config.Bearer:
-            elapsed = time.time() - config.timecode
-            return elapsed < mystat_auth.TOKEN_LIFETIME
-        return False
-
-
+        elapsed = time.time() - self.timecode
+        return self.Bearer and elapsed < self.TOKEN_LIFETIME
 
     def get_bearer_token(self):
         if not self.is_token_valid():
             return self.get_auth()
         print("[INFO] Используется сохранённый токен.")
-        return config.Bearer
-
-
-
+        return self.Bearer
 
     def get_marks(self):
         if not self.is_token_valid():
@@ -53,7 +44,7 @@ class mystat_auth:
 
         url = 'https://mapi.itstep.org/v1/mystat/aqtobe/statistic/marks'
         headers = {
-            'Authorization': f'Bearer {config.Bearer}'
+            'Authorization': f'Bearer {self.Bearer}'
         }
 
         response = requests.get(url, headers=headers)
@@ -65,45 +56,36 @@ class mystat_auth:
         else:
             print(f"[ERROR] Ошибка получения оценок: {response.status_code} — {response.text}")
             return None
-        
-
-
 
     def get_schedule_week(self, date):
         if not self.is_token_valid():
             print("[ERROR] Токен недействителен, требуется повторная авторизация.")
             return None
-        url=f"https://mapi.itstep.org/v1/mystat/aqtobe/schedule/get-month?type=week&date_filter={date}"
+        url = f"https://mapi.itstep.org/v1/mystat/aqtobe/schedule/get-month?type=week&date_filter={date}"
         headers = {
-            'Authorization': f'Bearer {config.Bearer}'
+            'Authorization': f'Bearer {self.Bearer}'
         }
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
-            data = response.json()
-            return data
+            return response.json()
         else:
             print(f"[ERROR] Ошибка получения расписания: {response.status_code} — {response.text}")
             return None
-        
-
 
     def get_schedule_month(self, date):
         if not self.is_token_valid():
             print("[ERROR] Токен недействителен, требуется повторная авторизация.")
             return None
-        url=f'https://mapi.itstep.org/v1/mystat/aqtobe/schedule/get-existing-schedule?date_filter={date}'
+        url = f'https://mapi.itstep.org/v1/mystat/aqtobe/schedule/get-existing-schedule?date_filter={date}'
         headers = {
-            'Authorization': f'Bearer {config.Bearer}'
+            'Authorization': f'Bearer {self.Bearer}'
         }
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
-            data = response.json()
-            return data
+            return response.json()
         else:
             print(f"[ERROR] Ошибка получения расписания: {response.status_code} — {response.text}")
             return None
-        
-
 
     def middlemark(self):
         marks = self.get_marks()

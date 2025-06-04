@@ -9,6 +9,8 @@ class mystat_auth:
         self.login = login
         self.password = password
 
+
+
     def get_auth(self):
         url = 'https://mapi.itstep.org/v1/mystat/auth/login'
         response = requests.post(url, json={
@@ -25,17 +27,24 @@ class mystat_auth:
             print(f"[ERROR] Ошибка авторизации: {response.status_code} — {response.text}")
             return None
 
+
+
     def is_token_valid(self):
         if hasattr(config, 'timecode') and hasattr(config, 'Bearer') and config.Bearer:
             elapsed = time.time() - config.timecode
             return elapsed < mystat_auth.TOKEN_LIFETIME
         return False
 
+
+
     def get_bearer_token(self):
         if not self.is_token_valid():
             return self.get_auth()
         print("[INFO] Используется сохранённый токен.")
         return config.Bearer
+
+
+
 
     def get_marks(self):
         if not self.is_token_valid():
@@ -51,11 +60,15 @@ class mystat_auth:
 
         if response.status_code == 200:
             data = response.json()
-            marks = [item['mark'] for item in data if 'mark' in item]
+            marks = [int(item['mark']) for item in data if 'mark' in item]
             return marks
         else:
             print(f"[ERROR] Ошибка получения оценок: {response.status_code} — {response.text}")
             return None
+        
+
+
+
     def get_schedule_week(self, date):
         if not self.is_token_valid():
             print("[ERROR] Токен недействителен, требуется повторная авторизация.")
@@ -71,6 +84,9 @@ class mystat_auth:
         else:
             print(f"[ERROR] Ошибка получения расписания: {response.status_code} — {response.text}")
             return None
+        
+
+
     def get_schedule_month(self, date):
         if not self.is_token_valid():
             print("[ERROR] Токен недействителен, требуется повторная авторизация.")
@@ -86,3 +102,13 @@ class mystat_auth:
         else:
             print(f"[ERROR] Ошибка получения расписания: {response.status_code} — {response.text}")
             return None
+        
+
+
+    def middlemark(self):
+        marks = self.get_marks()
+        if marks is None:
+            return None
+        if not marks:
+            return 0
+        return sum(marks) / len(marks)

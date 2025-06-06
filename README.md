@@ -1,7 +1,7 @@
 # mystat_auth
 
 Класс для авторизации и получения данных из API MyStat — личного кабинета ITStep.
-
+https://mystat.itstep.org/
 # Позволяет:
 
 Авторизоваться и получить токен доступа (Bearer Token)

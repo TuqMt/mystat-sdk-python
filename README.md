@@ -16,15 +16,10 @@
 Для работы требуется Python 3 и библиотека requests.
 
 Установите requests, если ещё не установлена:
+    pip install requests
 
-bash
-Копировать
-Редактировать
-pip install requests
-Использование
-python
-Копировать
-Редактировать
+
+# Использование
 from mystat_auth import MyStatAuth  # если класс сохранён в файле mystat_auth.py
 
 # Создание объекта с логином и паролем
@@ -49,7 +44,32 @@ print("Расписание на неделю:", schedule_week)
 # Получить расписание на месяц (пример с датой в формате 'YYYY-MM-DD')
 schedule_month = client.get_schedule_month('2023-06-01')
 print("Расписание на месяц:", schedule_month)
-Параметры конструктора
+
+# Создание объекта с логином и паролем
+client = MyStatAuth(login='your_login', password='your_password')
+
+# Получение токена (автоматически вызывается при необходимости)
+token = client.get_bearer_token()
+print("Токен:", token)
+
+# Получить оценки
+marks = client.get_marks()
+print("Оценки:", marks)
+
+# Вычислить средний балл
+average = client.middlemark()
+print("Средний балл:", average)
+
+# Получить расписание на неделю (пример с датой в формате 'YYYY-MM-DD')
+schedule_week = client.get_schedule_week('2023-06-01')
+print("Расписание на неделю:", schedule_week)
+
+# Получить расписание на месяц (пример с датой в формате 'YYYY-MM-DD')
+schedule_month = client.get_schedule_month('2023-06-01')
+print("Расписание на месяц:", schedule_month)
+
+
+# Параметры конструктора
 login — логин пользователя (строка)
 
 password — пароль пользователя (строка)
@@ -58,7 +78,7 @@ proxies — словарь с прокси для запросов (опцион
 
 pause — пауза между запросами в секундах (по умолчанию 0.5)
 
-Методы
+# Методы
 get_bearer_token() — возвращает текущий или новый токен авторизации
 
 get_marks() — возвращает список оценок (числа), либо None при ошибке

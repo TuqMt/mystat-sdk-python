@@ -1,19 +1,17 @@
 import time
 import requests
-from requests.auth import HTTPProxyAuth
 
 
 class mystat_auth:
     TOKEN_LIFETIME = 7200
     pause = 0.5
 
-    def __init__(self, login, password, proxies=None, proxy_auth=None):
+    def __init__(self, login, password, proxies=None):
         self.login = login
         self.password = password
         self.Bearer = ''
         self.timecode = 0
         self.proxies = proxies or {}
-        self.proxy_auth = proxy_auth
 
     def get_auth(self):
         time.sleep(self.pause)
@@ -23,7 +21,6 @@ class mystat_auth:
                 url,
                 json={'login': self.login, 'password': self.password},
                 proxies=self.proxies,
-                auth=self.proxy_auth
             )
 
             if response.status_code == 200:
@@ -60,7 +57,7 @@ class mystat_auth:
         headers = {'Authorization': f'Bearer {self.Bearer}'}
 
         try:
-            response = requests.get(url, headers=headers, proxies=self.proxies, auth=self.proxy_auth)
+            response = requests.get(url, headers=headers, proxies=self.proxies)
             if response.status_code == 200:
                 data = response.json()
                 marks = [int(item['mark']) for item in data if 'mark' in item]
@@ -82,7 +79,7 @@ class mystat_auth:
         headers = {'Authorization': f'Bearer {self.Bearer}'}
 
         try:
-            response = requests.get(url, headers=headers, proxies=self.proxies, auth=self.proxy_auth)
+            response = requests.get(url, headers=headers, proxies=self.proxies)
             if response.status_code == 200:
                 return response.json()
             else:
@@ -102,7 +99,7 @@ class mystat_auth:
         headers = {'Authorization': f'Bearer {self.Bearer}'}
 
         try:
-            response = requests.get(url, headers=headers, proxies=self.proxies, auth=self.proxy_auth)
+            response = requests.get(url, headers=headers, proxies=self.proxies)
             if response.status_code == 200:
                 return response.json()
             else:

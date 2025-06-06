@@ -1,8 +1,7 @@
 from core import mystat_auth 
-proxies = {
-    "http": "http://5435d268bba805db9446cr.de:1ce35e8a9661e50b@gw.dataimpulse.com:10000",
-    "https": "http://5435d268bba805db9446cr.de:1ce35e8a9661e50b@gw.dataimpulse.com:10000"
-}
+proxies = {"http":"5435d268bba805db9446__cr.de:1ce35e8a9661e50b@gw.dataimpulse.com:10000", 
+"https":"5435d268bba805db9446__cr.de:1ce35e8a9661e50b@gw.dataimpulse.com:10000"}
+
 
 auth = mystat_auth("foros_md93", "gHrh7w*6", proxies=proxies)
 

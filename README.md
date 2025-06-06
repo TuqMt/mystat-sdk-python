@@ -1,4 +1,4 @@
-#mystat_auth
+# mystat_auth
 
 Класс для авторизации и получения данных из API MyStat — личного кабинета ITStep.
 

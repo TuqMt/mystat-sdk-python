@@ -1,34 +1,42 @@
 import time
 import requests
+from requests.auth import HTTPProxyAuth
 
 
 class mystat_auth:
     TOKEN_LIFETIME = 7200
     pause = 0.5
 
-    def __init__(self, login, password, proxies=None):
+    def __init__(self, login, password, proxies=None, proxy_auth=None):
         self.login = login
         self.password = password
         self.Bearer = ''
         self.timecode = 0
         self.proxies = proxies or {}
+        self.proxy_auth = proxy_auth
 
     def get_auth(self):
         time.sleep(self.pause)
         url = 'https://mapi.itstep.org/v1/mystat/auth/login'
-        response = requests.post(url, json={
-            'login': self.login,
-            'password': self.password
-        }, proxies=self.proxies)
+        try:
+            response = requests.post(
+                url,
+                json={'login': self.login, 'password': self.password},
+                proxies=self.proxies,
+                auth=self.proxy_auth
+            )
 
-        if response.status_code == 200:
-            self.timecode = time.time()
-            self.Bearer = response.text.strip('"')
-            print("[INFO] Новый токен успешно получен.")
-            return self.Bearer
-        else:
-            print(f"[ERROR] Ошибка авторизации: {response.status_code} — {response.text}")
-            return None
+            if response.status_code == 200:
+                self.timecode = time.time()
+                self.Bearer = response.text.strip('"')
+                print("[INFO] Новый токен успешно получен.")
+                return True, self.Bearer
+            else:
+                print(f"[ERROR] Ошибка авторизации: {response.status_code} — {response.text}")
+                return False, None
+        except requests.exceptions.RequestException as e:
+            print(f"[EXCEPTION] Ошибка при попытке авторизации: {e}")
+            return False, None
 
     def is_token_valid(self):
         elapsed = time.time() - self.timecode
@@ -37,7 +45,8 @@ class mystat_auth:
     def get_bearer_token(self):
         time.sleep(self.pause)
         if not self.is_token_valid():
-            return self.get_auth()
+            success, token = self.get_auth()
+            return token if success else None
         print("[INFO] Используется сохранённый токен.")
         return self.Bearer
 
@@ -48,18 +57,19 @@ class mystat_auth:
             return None
 
         url = 'https://mapi.itstep.org/v1/mystat/aqtobe/statistic/marks'
-        headers = {
-            'Authorization': f'Bearer {self.Bearer}'
-        }
+        headers = {'Authorization': f'Bearer {self.Bearer}'}
 
-        response = requests.get(url, headers=headers, proxies=self.proxies)
-
-        if response.status_code == 200:
-            data = response.json()
-            marks = [int(item['mark']) for item in data if 'mark' in item]
-            return marks
-        else:
-            print(f"[ERROR] Ошибка получения оценок: {response.status_code} — {response.text}")
+        try:
+            response = requests.get(url, headers=headers, proxies=self.proxies, auth=self.proxy_auth)
+            if response.status_code == 200:
+                data = response.json()
+                marks = [int(item['mark']) for item in data if 'mark' in item]
+                return marks
+            else:
+                print(f"[ERROR] Ошибка получения оценок: {response.status_code} — {response.text}")
+                return None
+        except requests.exceptions.RequestException as e:
+            print(f"[EXCEPTION] Ошибка при получении оценок: {e}")
             return None
 
     def get_schedule_week(self, date):
@@ -67,15 +77,19 @@ class mystat_auth:
         if not self.is_token_valid():
             print("[ERROR] Токен недействителен, требуется повторная авторизация.")
             return None
+
         url = f"https://mapi.itstep.org/v1/mystat/aqtobe/schedule/get-month?type=week&date_filter={date}"
-        headers = {
-            'Authorization': f'Bearer {self.Bearer}'
-        }
-        response = requests.get(url, headers=headers, proxies=self.proxies)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            print(f"[ERROR] Ошибка получения расписания: {response.status_code} — {response.text}")
+        headers = {'Authorization': f'Bearer {self.Bearer}'}
+
+        try:
+            response = requests.get(url, headers=headers, proxies=self.proxies, auth=self.proxy_auth)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"[ERROR] Ошибка получения расписания: {response.status_code} — {response.text}")
+                return None
+        except requests.exceptions.RequestException as e:
+            print(f"[EXCEPTION] Ошибка при получении недельного расписания: {e}")
             return None
 
     def get_schedule_month(self, date):
@@ -83,15 +97,19 @@ class mystat_auth:
         if not self.is_token_valid():
             print("[ERROR] Токен недействителен, требуется повторная авторизация.")
             return None
+
         url = f'https://mapi.itstep.org/v1/mystat/aqtobe/schedule/get-existing-schedule?date_filter={date}'
-        headers = {
-            'Authorization': f'Bearer {self.Bearer}'
-        }
-        response = requests.get(url, headers=headers, proxies=self.proxies)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            print(f"[ERROR] Ошибка получения расписания: {response.status_code} — {response.text}")
+        headers = {'Authorization': f'Bearer {self.Bearer}'}
+
+        try:
+            response = requests.get(url, headers=headers, proxies=self.proxies, auth=self.proxy_auth)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"[ERROR] Ошибка получения расписания: {response.status_code} — {response.text}")
+                return None
+        except requests.exceptions.RequestException as e:
+            print(f"[EXCEPTION] Ошибка при получении месячного расписания: {e}")
             return None
 
     def middlemark(self):

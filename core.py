@@ -4,23 +4,26 @@ import requests
 
 class mystat_auth:
     TOKEN_LIFETIME = 7200
+    pause = 0.5
 
-    def __init__(self, login, password):
+    def __init__(self, login, password, proxies=None):
         self.login = login
         self.password = password
         self.Bearer = ''
         self.timecode = 0
+        self.proxies = proxies or {}
 
     def get_auth(self):
+        time.sleep(self.pause)
         url = 'https://mapi.itstep.org/v1/mystat/auth/login'
         response = requests.post(url, json={
             'login': self.login,
             'password': self.password
-        })
+        }, proxies=self.proxies)
 
         if response.status_code == 200:
             self.timecode = time.time()
-            self.Bearer = response.text.strip('"')  
+            self.Bearer = response.text.strip('"')
             print("[INFO] Новый токен успешно получен.")
             return self.Bearer
         else:
@@ -32,12 +35,14 @@ class mystat_auth:
         return self.Bearer and elapsed < self.TOKEN_LIFETIME
 
     def get_bearer_token(self):
+        time.sleep(self.pause)
         if not self.is_token_valid():
             return self.get_auth()
         print("[INFO] Используется сохранённый токен.")
         return self.Bearer
 
     def get_marks(self):
+        time.sleep(self.pause)
         if not self.is_token_valid():
             print("[ERROR] Токен недействителен, требуется повторная авторизация.")
             return None
@@ -47,7 +52,7 @@ class mystat_auth:
             'Authorization': f'Bearer {self.Bearer}'
         }
 
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, proxies=self.proxies)
 
         if response.status_code == 200:
             data = response.json()
@@ -58,6 +63,7 @@ class mystat_auth:
             return None
 
     def get_schedule_week(self, date):
+        time.sleep(self.pause)
         if not self.is_token_valid():
             print("[ERROR] Токен недействителен, требуется повторная авторизация.")
             return None
@@ -65,7 +71,7 @@ class mystat_auth:
         headers = {
             'Authorization': f'Bearer {self.Bearer}'
         }
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, proxies=self.proxies)
         if response.status_code == 200:
             return response.json()
         else:
@@ -73,6 +79,7 @@ class mystat_auth:
             return None
 
     def get_schedule_month(self, date):
+        time.sleep(self.pause)
         if not self.is_token_valid():
             print("[ERROR] Токен недействителен, требуется повторная авторизация.")
             return None
@@ -80,7 +87,7 @@ class mystat_auth:
         headers = {
             'Authorization': f'Bearer {self.Bearer}'
         }
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, proxies=self.proxies)
         if response.status_code == 200:
             return response.json()
         else:
@@ -88,6 +95,7 @@ class mystat_auth:
             return None
 
     def middlemark(self):
+        time.sleep(self.pause)
         marks = self.get_marks()
         if marks is None:
             return None

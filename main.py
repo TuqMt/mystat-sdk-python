@@ -1,5 +1,12 @@
 from core import mystat_auth 
-auth = mystat_auth("foros_md93", "gHrh7w*6")
+proxies = {
+    "http": "http://5435d268bba805db9446cr.de:1ce35e8a9661e50b@gw.dataimpulse.com:10000",
+    "https": "http://5435d268bba805db9446cr.de:1ce35e8a9661e50b@gw.dataimpulse.com:10000"
+}
+
+auth = mystat_auth("foros_md93", "gHrh7w*6", proxies=proxies)
+
+
 token = auth.get_bearer_token()  
 marks = auth.get_marks()
 print(marks)

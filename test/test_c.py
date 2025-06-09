@@ -45,8 +45,12 @@ def test_case_6():
 def test_case_7():
     auth = mystat_auth(VALID_LOGIN, VALID_PASSWORD)
     auth.get_auth()
-    result = auth.get_schedule_week("2025-06-09")
-    return (type(result) == dict or result is None) == True
+    result = auth.get_schedule_week("0000-06-09")
+    if result['data']==[]:
+        return True
+    else:
+        return False
+
 
 def test_case_8():
     auth = mystat_auth(VALID_LOGIN, VALID_PASSWORD)
